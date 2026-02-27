@@ -17,9 +17,9 @@
 
 | Service | Platform | URL |
 |---|---|---|
-| 🖥️ React Frontend | **Vercel** | *(Add your Vercel URL here)* |
-| ⚙️ FastAPI Backend | **Render** | *(Add your Render URL here)* |
-| 📊 Streamlit SOC Dashboard | **Render / Streamlit Cloud** | *(Add your Streamlit URL here)* |
+| 🖥️ React Frontend | **Vercel** | *(https://cyber-sentinel-ai-ten.vercel.app/)* |
+| ⚙️ FastAPI Backend | **Render** | ** |
+| 📊 Streamlit SOC Dashboard | **Render / Streamlit Cloud** | ** |
 
 </div>
 
