@@ -85,12 +85,6 @@ flowchart TD
 
     API <-->|REST API JSON| UI
     SOC <-->|Direct Python Import / Fallback| ML
-    
-    classDef cloud fill:#0d1117,stroke:#2d3139,stroke-width:2px,color:#fff;
-    classDef local fill:#161b22,stroke:#0f5323,stroke-width:2px,color:#fff;
-    
-    class LocalEnv local;
-    class RenderCloud,VercelCloud,StreamlitUI cloud;
 ```
 
 ### Architecture Deep Dive
