@@ -61,13 +61,13 @@ The project employs a decoupled, multi-tier microservices architecture consistin
 
 ```mermaid
 flowchart TD
-    subgraph Local Environment (Laptop/On-Premise)
+    subgraph "Local Environment (Laptop/On-Premise)"
         DS[(10GB+ Network Datasets)]
         LDS[Local Data Server\ndata_server.py]
         DS -->|Chunked CSV Reads| LDS
     end
 
-    subgraph Cloud Infrastructure (Render)
+    subgraph "Cloud Infrastructure (Render)"
         API[FastAPI Backend Server]
         ML[ML Engine\nscikit-learn]
         
@@ -75,11 +75,11 @@ flowchart TD
         API <-->|Train / Predict| ML
     end
 
-    subgraph Cloud Infrastructure (Vercel)
+    subgraph "Cloud Infrastructure (Vercel)"
         UI[React Dashboard]
     end
     
-    subgraph Alternative UI (Streamlit Cloud / Render)
+    subgraph "Alternative UI (Streamlit Cloud / Render)"
         SOC[Streamlit SOC Console]
     end
 
@@ -88,8 +88,10 @@ flowchart TD
     
     classDef cloud fill:#0d1117,stroke:#2d3139,stroke-width:2px,color:#fff;
     classDef local fill:#161b22,stroke:#0f5323,stroke-width:2px,color:#fff;
-    class Local Environment local;
-    class Cloud Infrastructure cloud;
+    class "Local Environment (Laptop/On-Premise)" local;
+    class "Cloud Infrastructure (Render)" cloud;
+    class "Cloud Infrastructure (Vercel)" cloud;
+    class "Alternative UI (Streamlit Cloud / Render)" cloud;
 ```
 
 ### Architecture Deep Dive
