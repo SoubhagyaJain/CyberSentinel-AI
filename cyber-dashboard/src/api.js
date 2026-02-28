@@ -39,6 +39,12 @@ export async function resetSimulation() {
     return res.json();
 }
 
+export async function resetModels() {
+    const res = await fetch(`${API}/api/models/reset`, { method: 'POST' });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+
 export async function getSystemMetrics() {
     const res = await fetch(`${API}/api/system`);
     if (!res.ok) throw new Error(await res.text());

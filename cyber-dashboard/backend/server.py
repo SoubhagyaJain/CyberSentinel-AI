@@ -93,6 +93,16 @@ def health():
 @app.post("/api/train")
 def train_models(req: TrainRequest):
     """Train one or all models."""
+    # ── Reset simulation state so gauges/severity rings show clean zeros ──
+    app.state.total_packets = 0
+    app.state.blocked_packets = 0
+    app.state.attack_history = []
+    app.state.packet_log = []
+    app.state.unique_ips = set()
+    app.state.threat_level = "LOW"
+    app.state.attack_type_counts = {}
+    app.state.simulation_running = False
+
     df = load_data(data_dir=DATA_DIR, sample_size=req.sample_size)
     if df is None or df.empty:
         raise HTTPException(500, "Failed to load data")
@@ -106,7 +116,20 @@ def train_models(req: TrainRequest):
     app.state.y_test = y_test
 
     names_to_train = [req.model_name] if req.model_name else ALL_MODELS
+
+    # ── Clear only the models that are about to be retrained ──────────────
+    # This ensures the results grid shows EXACTLY what was selected for training.
+    for n in names_to_train:
+        app.state.models.pop(n, None)
+
+    # If the active model is one of the ones being retrained, temporarily unset it
+    # so the auto-select logic can restore it cleanly after training.
+    if app.state.active_model_name in names_to_train:
+        app.state.active_model = None
+        app.state.active_model_name = "None"
+
     results = {}
+
 
     for name in names_to_train:
         try:
@@ -124,20 +147,27 @@ def train_models(req: TrainRequest):
             traceback.print_exc()
             raise HTTPException(status_code=500, detail=f"Training failed for model '{name}': {e}")
 
-    # Set best model as active
+    # ── Set active model ──────────────────────────────────────────────────
+    best = None
     if app.state.models:
         best = max(
             app.state.models,
             key=lambda k: app.state.models[k]["metrics"].get("f1", 0)
         )
-        app.state.active_model = app.state.models[best]["model"]
-        app.state.active_model_name = best
+        if app.state.active_model_name == "None" or app.state.active_model is None:
+            # First training ever — auto-pick the best model
+            app.state.active_model = app.state.models[best]["model"]
+            app.state.active_model_name = best
+        elif app.state.active_model_name in app.state.models:
+            # User's chosen model was just retrained — refresh the object
+            app.state.active_model = app.state.models[app.state.active_model_name]["model"]
+        # else: user's chosen model wasn't in this training batch — keep it as is
 
     return {
         "results": results,
         "classes": app.state.classes,
         "active_model": app.state.active_model_name,
-        "best_model": best if app.state.models else None,
+        "best_model": best,
     }
 
 
@@ -224,6 +254,28 @@ def predict(req: PredictRequest):
 
 @app.post("/api/simulation/reset")
 def reset_simulation():
+    app.state.total_packets = 0
+    app.state.blocked_packets = 0
+    app.state.attack_history = []
+    app.state.packet_log = []
+    app.state.unique_ips = set()
+    app.state.threat_level = "LOW"
+    app.state.attack_type_counts = {}
+    app.state.simulation_running = False
+    return {"status": "reset"}
+
+
+@app.post("/api/models/reset")
+def reset_models():
+    """Clear all trained models and reset active model — results grid goes blank."""
+    app.state.models = {}
+    app.state.active_model = None
+    app.state.active_model_name = "None"
+    app.state.classes = []
+    app.state.feature_names = []
+    app.state.X_test = None
+    app.state.y_test = None
+    # Also reset simulation state
     app.state.total_packets = 0
     app.state.blocked_packets = 0
     app.state.attack_history = []
