@@ -116,7 +116,20 @@ def train_models(req: TrainRequest):
     app.state.y_test = y_test
 
     names_to_train = [req.model_name] if req.model_name else ALL_MODELS
+
+    # ── Clear only the models that are about to be retrained ──────────────
+    # This ensures the results grid shows EXACTLY what was selected for training.
+    for n in names_to_train:
+        app.state.models.pop(n, None)
+
+    # If the active model is one of the ones being retrained, temporarily unset it
+    # so the auto-select logic can restore it cleanly after training.
+    if app.state.active_model_name in names_to_train:
+        app.state.active_model = None
+        app.state.active_model_name = "None"
+
     results = {}
+
 
     for name in names_to_train:
         try:
