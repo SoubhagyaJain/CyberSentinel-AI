@@ -1,6 +1,6 @@
 import { useState, useCallback, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { trainModels, setActiveModel } from '../api';
+import { trainModels, setActiveModel, resetModels } from '../api';
 import { DashboardContext } from '../App';
 
 const ALL_MODELS = ['Random Forest', 'Decision Tree', 'Gaussian NB', 'XGBoost', 'MLP'];
@@ -58,6 +58,17 @@ export default function ModelSection({ dashData }) {
     const bestModel = models.length > 0
         ? models.reduce((a, b) => (a.f1 > b.f1 ? a : b))
         : null;
+
+    // ── Reset all trained models ───────────────────────────────────────────
+    const handleResetModels = async () => {
+        if (!window.confirm('Clear all trained models and scores?')) return;
+        setPendingActiveModel(null);
+        try {
+            await resetModels();
+        } catch (e) {
+            console.error('Failed to reset models', e);
+        }
+    };
 
     // ── Model checkbox toggle ──────────────────────────────────────────────
     const toggleModel = (name) => {
@@ -160,6 +171,21 @@ export default function ModelSection({ dashData }) {
                                 SIMULATION ACTIVE · {activeModel}
                             </span>
                         </div>
+                    )}
+                    {models.length > 0 && !training && (
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleResetModels}
+                            style={{
+                                padding: '6px 14px', borderRadius: '8px',
+                                background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+                                color: '#EF4444', fontSize: '12px', fontWeight: 600,
+                                cursor: 'pointer', fontFamily: 'inherit',
+                            }}
+                        >
+                            🗑 Reset Models
+                        </motion.button>
                     )}
                     <motion.button
                         whileHover={{ scale: 1.05 }}

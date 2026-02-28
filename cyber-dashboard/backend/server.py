@@ -265,6 +265,28 @@ def reset_simulation():
     return {"status": "reset"}
 
 
+@app.post("/api/models/reset")
+def reset_models():
+    """Clear all trained models and reset active model — results grid goes blank."""
+    app.state.models = {}
+    app.state.active_model = None
+    app.state.active_model_name = "None"
+    app.state.classes = []
+    app.state.feature_names = []
+    app.state.X_test = None
+    app.state.y_test = None
+    # Also reset simulation state
+    app.state.total_packets = 0
+    app.state.blocked_packets = 0
+    app.state.attack_history = []
+    app.state.packet_log = []
+    app.state.unique_ips = set()
+    app.state.threat_level = "LOW"
+    app.state.attack_type_counts = {}
+    app.state.simulation_running = False
+    return {"status": "reset"}
+
+
 @app.get("/api/system")
 def system_metrics():
     ram = psutil.virtual_memory()
