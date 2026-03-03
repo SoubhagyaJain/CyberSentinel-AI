@@ -28,7 +28,9 @@
 
 ## Demo
 
-> **Screenshots / demo GIF placeholder** — replace with actual recordings.
+
+<img width="1920" height="3205" alt="screencapture-cyber-sentinel-ai-ten-vercel-app-2026-03-03-10_18_18" src="https://github.com/user-attachments/assets/913efa90-4a86-4a64-9b0f-7ca1d25830c4" />
+
 
 ![Demo Placeholder](https://via.placeholder.com/900x450?text=CyberSentinel+Dashboard+Demo)
 
