@@ -27,9 +27,12 @@
 ---
 
 ## Demo
+<img width="1920" height="3436" alt="screencapture-cyber-sentinel-ai-ten-vercel-app-2026-03-03-10_17_43" src="https://github.com/user-attachments/assets/178a2453-5cae-415a-8e40-9b48a8513773" />
+<img width="1920" height="2161" alt="screencapture-cyber-sentinel-ai-ten-vercel-app-2026-03-03-10_17_58" src="https://github.com/user-attachments/assets/eeedea0d-c2d3-4d30-9334-115762607805" />
+<img width="1920" height="3205" alt="screencapture-cyber-sentinel-ai-ten-vercel-app-2026-03-03-10_18_18" src="https://github.com/user-attachments/assets/3769d6e8-0185-4afb-b234-144f9766ec5a" />
 
 
-<img width="1920" height="3205" alt="screencapture-cyber-sentinel-ai-ten-vercel-app-2026-03-03-10_18_18" src="https://github.com/user-attachments/assets/913efa90-4a86-4a64-9b0f-7ca1d25830c4" />
+
 
 
 ![Demo Placeholder](https://via.placeholder.com/900x450?text=CyberSentinel+Dashboard+Demo)
