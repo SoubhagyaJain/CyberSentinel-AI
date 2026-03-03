@@ -35,7 +35,7 @@
 
 
 
-![Demo Placeholder](https://via.placeholder.com/900x450?text=CyberSentinel+Dashboard+Demo)
+![Demo Placeholder](https://drive.google.com/file/d/1gnCsBd0WMz2MyEXns71qLodzDs0Un9x0/view?usp=drive_link)
 
 ---
 
