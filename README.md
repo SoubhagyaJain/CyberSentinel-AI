@@ -31,6 +31,8 @@
 <img width="1920" height="2161" alt="screencapture-cyber-sentinel-ai-ten-vercel-app-2026-03-03-10_17_58" src="https://github.com/user-attachments/assets/eeedea0d-c2d3-4d30-9334-115762607805" />
 <img width="1920" height="3205" alt="screencapture-cyber-sentinel-ai-ten-vercel-app-2026-03-03-10_18_18" src="https://github.com/user-attachments/assets/3769d6e8-0185-4afb-b234-144f9766ec5a" />
 
+###Data set download
+https://www.kaggle.com/datasets/h2020simargl/simargl2021-network-intrusion-detection-dataset?resource=download
 
 
 
