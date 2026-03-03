@@ -2,349 +2,223 @@
 
 # 🛡️ CyberSentinel AI
 
-### Real-Time Network Intrusion Detection System powered by Machine Learning
+**Elite Real-Time Network Intrusion Detection & AI SOC Dashboard**
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=black)](https://scikit-learn.org/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-> A full-stack SOC (Security Operations Center) platform that trains, compares, and deploys multiple ML models to detect cyber intrusions in real time — with an interactive React dashboard and an educational XAI (Explainable AI) engine.
+> CyberSentinel AI is an end-to-end, production-ready Security Operations Center (SOC) platform. It bridges theoretical data science and practical cybersecurity by training, evaluating, and deploying multiple Machine Learning architectures to detect zero-day exploits and network intrusions in real-time, all while demystifying decisions through Explainable AI (XAI).
 
-**🚀 Live Deployments**
-
-| Service | Platform | URL |
-|---|---|---|
-| 🖥️ React Frontend | **Vercel** | *(Add your Vercel URL here)* |
-| ⚙️ FastAPI Backend | **Render** | *(Add your Render URL here)* |
-| 📊 Streamlit SOC Dashboard | **Render / Streamlit Cloud** | *(Add your Streamlit URL here)* |
+🌐 **LIVE DEPLOYMENTS (Vercel & Render)** | _Coming Soon / Add URLs here_
 
 </div>
 
 ---
 
-## 📋 Table of Contents
+## 📖 Table of Contents
 
-- [Overview](#-overview)
+- [Executive Summary](#-executive-summary)
 - [System Architecture](#-system-architecture)
-- [Machine Learning Pipeline](#-machine-learning-pipeline)
-  - [Dataset & Data Engineering](#dataset--data-engineering)
-  - [Model Training & Selection](#model-training--selection)
-  - [Explainable AI (XAI) / SHAP](#explainable-ai-xai--shap)
-- [Local Data Extraction Server](#-local-data-extraction-server)
-- [Future Improvements & Roadmap](#-future-improvements--roadmap)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [Quick Start](#-quick-start)
-  - [Backend (FastAPI)](#1-fastapi-backend)
-  - [Frontend (React + Vite)](#2-react-frontend)
-  - [Streamlit SOC Dashboard](#3-streamlit-soc-dashboard)
-- [Deployment Specifications](#-deployment-specifications)
-- [API Reference](#-api-reference)
-- [Contributing](#-contributing)
+- [Engineering The Data Pipeline: Overcoming Cloud Limits](#-engineering-the-data-pipeline)
+- [Machine Learning & Model Operations (MLOps)](#-machine-learning--mlops)
+  - [The Multi-Model Benchmark](#the-multi-model-benchmark)
+  - [Explainable AI (XAI) & Feature Interpretability](#explainable-ai-xai--feature-interpretability)
+- [Dual-Frontend Paradigm](#-dual-frontend-paradigm)
+  - [1. React + Vite Cyber Dashboard](#1-react--vite-cyber-dashboard)
+  - [2. Streamlit Advanced SOC Console](#2-streamlit-advanced-soc-console)
+- [Tech Stack Overview](#-tech-stack-overview)
+- [Getting Started (Local & Cloud Deployment)](#-getting-started)
+- [Future Roadmap](#-future-roadmap)
 
 ---
 
-## 🔍 Overview
+## 🎯 Executive Summary
 
-**CyberSentinel AI** bridges the gap between theoretical data science and practical cybersecurity analysis. Designed as an end-to-end network intrusion detection system (NIDS), it performs real-time traffic classification against modern cyber threats (DoS, DDoS, Probing, R2L). 
+In enterprise environments, dropping packets aggressively without valid justification disrupts legitimate business functions. CyberSentinel was built not just to **detect** network anomalies like DoS, DDoS, Probing, and R2L attacks, but to **explain** why they were flagged.
 
-What sets this project apart is its **multi-model comparison pipeline** and **Explainable AI (XAI) integration**. Rather than acting as a "black box" that arbitrarily blocks IP addresses, CyberSentinel trains five disparate models simultaneously, visualizes their behavior using SHAP (SHapley Additive exPlanations), and provides plain-English justifications for its alerts.
+**The core tenets of this platform:**
+1. **Dynamic Model Auto-Selection:** Instead of relying on a hardcoded algorithm, the backend concurrently trains and evaluates multiple classifiers (Random Forest, Decision Tree, Naïve Bayes, XGBoost, MLP), dynamically promoting the architecture with the highest F1-Score to the live inference engine.
+2. **Explainable AI (XAI):** Utilizing feature-importance matrices and SHAP-inspired logic, the platform translates raw numeric outputs into human-readable SOC narratives (e.g., _"Connection flagged due to unusual TCP Window Scale anomalies"_).
+3. **Decoupled Edge Ingestion:** Cybersecurity CSV datasets frequently exceed 10GB+, instantly crashing free-tier cloud environments. CyberSentinel introduces a localized Ngrok-tunneled HTTP data server (`data_server.py`) that streams down-sampled, byte-casted rows sequentially to the cloud inference layer, bypassing PaaS disk limits.
 
 ---
 
 ## 🏗️ System Architecture
 
-The project employs a decoupled, multi-tier microservices architecture consisting of a data ingestion layer, an inference API, and two distinct frontend consumption interfaces.
+CyberSentinel operates as a multi-tier microservice ecosystem, decoupling heavy data processing, RESTful ML inference, and reactive frontend clients.
 
 ```mermaid
 flowchart TD
-    subgraph LocalEnv ["Local Environment (Laptop/On-Premise)"]
-        DS[(10GB+ Network Datasets)]
-        LDS[Local Data Server\ndata_server.py]
-        DS -->|Chunked CSV Reads| LDS
+    %% Local Ingestion Layer
+    subgraph DataEdge ["Data Ingestion Edge (Local / On-Premise)"]
+        RawData[(Massive CSV Datasets\n10GB+)]
+        DS[data_server.py\nStreaming Server]
+        RawData -- "Iterative Chunk Reading" --> DS
     end
 
-    subgraph RenderCloud ["Cloud Infrastructure (Render)"]
-        API[FastAPI Backend Server]
-        ML[ML Engine\nscikit-learn]
+    %% Cloud Inference Layer
+    subgraph CloudBackend ["Cloud ML Inference Backend (FastAPI / Render)"]
+        API[FastAPI Gateway]
+        MLCore[Scikit-Learn & XGBoost Engine]
+        State[In-Memory Threat State & Cache]
         
-        LDS -->|HTTPS Stream via Ngrok| API
-        API <-->|Train / Predict| ML
+        DS -- "HTTPS Stream (Ngrok Tunneling)" --> API
+        API <--> MLCore
+        API <--> State
     end
 
-    subgraph VercelCloud ["Cloud Infrastructure (Vercel)"]
-        UI[React Dashboard]
-    end
-    
-    subgraph StreamlitUI ["Alternative UI (Streamlit Cloud / Render)"]
-        SOC[Streamlit SOC Console]
+    %% Cloud Clients
+    subgraph Clients ["Frontend Consumers"]
+        ReactUI[React + Vite Web Dashboard\n(Vercel)]
+        StreamlitUI[Streamlit SOC Console\n(Direct Python UI)]
     end
 
-    API <-->|REST API JSON| UI
-    SOC <-->|Direct Python Import / Fallback| ML
-```
-
-### Architecture Deep Dive
-
-1. **Local Data Server (Ingestion Source)**: Cloud platforms strictly limit free-tier disk space. Because cyber datasets exceed 10GB, `data_server.py` runs on your local machine and acts as an HTTP streaming server. It dynamically reads, interleaved, samples, and streams CSV rows to the cloud backend.
-2. **FastAPI Backend (Inference & Aggregation)**: The Render-hosted API. It downloads memory-safe dataset chunks (`sample_size` parameterized), trains models locally using `joblib` artifacts, and holds application state in-memory (simulation logs, packet counts, system metrics).
-3. **React Client (Consumer)**: Deployed on Vercel, this is the modern, reactive interface. It polls the FastAPI endpoints for live inferences (`/api/predict`), metrics (`/api/system`), and current model states.
-4. **Streamlit Console**: An alternative, fully-native Python frontend focused on deep analytical workflows (SHAP charts, confusion matrices, localized explanations).
-
----
-
-## 🧠 Machine Learning Pipeline
-
-### Dataset & Data Engineering
-
-CyberSentinel leverages large-scale Network Intrusion datasets (e.g., CICIDS-2017, NSL-KDD, UNSW-NB15) combining benign packet captures and active attack vectors.
-
-**Feature Engineering & Memory Management:**
-Processing 10GB+ of CSV data in Python routinely causes `MemoryError`. CyberSentinel solves this with aggressive memory alignment:
-- **Fractional Iterative Loading:** Instead of `pd.read_csv()` loading entirely to memory, we ingest chunks and apply immediate `frac=0.3` down-sampling.
-- **Type Downcasting:** 64-bit precision is unnecessary for packet metrics. We immediately cast `float64 -> float32` and `int64 -> int32`, cutting RAM requirements by ~50%.
-- **Selected Dimensionality:** We slice the dataset strictly to the 15 most critical TCP/IP feature vectors (e.g., `TCP_WIN_SCALE_OUT`, `FLOW_DURATION_MILLISECONDS`, `PROTOCOL`, `DST_TOS`) out of 80+ potential features.
-
-**Preprocessing Strategy:**
-- Target variables (`LABEL`) are grouped and encoded via `LabelEncoder()`.
-- Numeric features (like duration or byte counts) are normalized using `StandardScaler()` to ensure gradient-based methods converge rapidly.
-
-### Model Training & Selection
-
-The `train_model.py` and backend `engine.py` orchestrate a concurrent train-test-evaluation sequence using a standardized 70/30 split. 
-
-1. **Random Forest (n=30)**: Highly resistant to overfitting; provides robust baseline feature importance metrics.
-2. **Decision Tree (depth=4)**: Ultra-fast inference with completely transparent branching, used as a reliable fallback.
-3. **Gaussian Naïve Bayes**: Extremely lightweight, assumes feature independence (an assumption often violated in networking, yet yields surprisingly fast anomaly detection).
-4. **XGBoost (Future-Ready)**: Capable of handling massive class imbalances inherent in intrusion data.
-5. **Multi-Layer Perceptron (MLP)**: Deep learning representation to capture nonlinear relationships in protocol state behaviors.
-
-**Evaluation:**
-The backend assesses models synchronously scoring them against:
-* **F1-Score (Weighted):** The definitive metric due to heavy class imbalances (Benign traffic usually overwhelms Malicious).
-* **Recall:** Critical in NIDS. A false negative (missing an attack) is catastrophically worse than a false positive.
-* **Accuracy & Precision.**
-
-The engine auto-promotes the model with the highest F1-score to **Active Status** for live API inference.
-
-### Explainable AI (XAI) / SHAP
-
-In enterprise SOC environments, dropping packets without explanation is unacceptable. CyberSentinel incorporates **SHAP** to enforce operational transparency:
-
-1. **Global Importance:** Generates summary plots across the entire test set to prove the model is evaluating valid features (e.g., "The model flags anomalies primarily based on rapid `TCP_WIN_SCALE` changes, which accurately reflects a SYN flood").
-2. **Local Interpretability (Per-Packet Analysis):** For any specific packet flagged as a threat, SHAP decomposes the prediction probabilties into exact feature contributions (e.g., "`FLOW_DURATION_MILLISECONDS` pushed the probability of 'ATTACK' up by +34%").
-
----
-
-## 📡 Local Data Extraction Server
-
-To bypass cloud storage limits, the project ships with `data_server.py`.
-
-1. Place `dataset-partX.csv` files in the root directory.
-2. Run `python data_server.py`. It starts an HTTP server on port `7860`.
-3. The server features built-in basic token authorization.
-4. Expose the port using ngrok: `ngrok http 7860`.
-5. Supply the resulting HTTPS URL to the Render backend environment variables. The backend now uses your laptop as a distributed SAN!
-
----
-
-## 🚀 Future Improvements & Roadmap
-
-While this project succeeds beautifully as an analytical dashboard and ML pipeline demonstration, actual enterprise NIDS require further evolution.
-
-<details>
-<summary><b>1. Move from Batch CSV to Live Packet Sniffing</b></summary>
-Currently, predictions run against simulated data streams. To make this a functional, deployable firewall appliance:
-- Integrate `pyshark` or `scapy`.
-- Write a daemon that binds to a physical network interface (e.g., `eth0`), actively sniffing packets.
-- Convert raw PCAP frames into the 15-feature numeric vectors required by the model in real-time (Rolling window calculation).
-</details>
-
-<details>
-<summary><b>2. Incorporate Temporal Sequences (Deep Learning)</b></summary>
-Attacks like "Slowloris" or advanced probing don't happen in single packets—they are behaviors spanning thousands of packets over minutes.
-- Expand from single-vector Scikit-Learn models to sequence models.
-- Implement Recurrent Neural Networks (LSTMs) or Transformers in PyTorch/TensorFlow to evaluate the *context* and *timing* of a flow over X milliseconds.
-</details>
-
-<details>
-<summary><b>3. Hardened Enterprise Backend Architecture</b></summary>
-- **Database Layer**: Transition away from holding simulation state in Python memory. Implement PostgreSQL for relational data and Redis for high-speed rate limiting and streaming logs.
-- **Message Queues**: Decouple the ML inference engine from the FastAPI thread via Celery or Apache Kafka. 
-- **RBAC**: Implement JSON Web Tokens (JWT) for authentication and Role-Based Access Control (Analyst vs. Admin views).
-</details>
-
-<details>
-<summary><b>4. Distributed Big Data Training</b></summary>
-Instead of chunking, downcasting, and sampling 10GB of CSVs to survive single-node RAM limits:
-- Rewrite the training pipeline using **PySpark** or **Dask**.
-- Allow the models to iteratively train on the entirety of the 50GB+ dataset across a distributed server cluster.
-</details>
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend — React (`/cyber-dashboard`)
-| Package | Version | Purpose |
-|---|---|---|
-| React | 18.2 | Component-based UI formulation |
-| Vite | 6.x | High-speed ESM build tool / HMR |
-| TailwindCSS | 4.x | Inline utility-class styling |
-| Framer Motion | 11.x | Fluid DOM element transitions |
-| Recharts | 2.x | Real-time SVG charting |
-| react-simple-maps | 3.x | Geo-threat visualization |
-
-### Backend — FastAPI (`/cyber-dashboard/backend`)
-| Package | Purpose |
-|---|---|
-| FastAPI | Asynchronous REST endpoint generation |
-| Uvicorn | High-performance ASGI server |
-| scikit-learn | Tree-based models & linear algorithms |
-| XGBoost | Gradient boosting framework |
-| Pandas / NumPy | DataFrame handling / tensor math |
-| psutil | Hardware performance monitoring |
-
-### Streamlit Dashboard (`/IntrusionDetectionDashboard`)
-| Package | Purpose |
-|---|---|
-| Streamlit ≥ 1.25 | Rapid prototyping state-based UI |
-| Plotly ≥ 5.15 | Highly interactive analytical charts |
-| SHAP ≥ 0.42 | Game-theoretic explainability engine |
-
----
-
-## 📁 Project Structure
-
-```text
-CyberSentinel-AI/
-│
-├── IntrusionDetectionDashboard/        # (Standalone) Streamlit SOC UI
-│   ├── app.py                          
-│   ├── config.py                       
-│   ├── utils/                          # Contains ML, eval, SHAP logic specific to Streamlit
-│   └── models/                         # Local joblib output storage
-│
-├── cyber-dashboard/                    # (Main Application) React + FastAPI
-│   ├── src/                            # React Component Tree
-│   ├── index.html                      
-│   ├── vite.config.js                  
-│   └── backend/                        # The Python REST Engine
-│       ├── server.py                   # Uvicorn entry point & Route definitions
-│       ├── requirements.txt            
-│       └── ml/                         
-│           ├── data.py                 # Remote/Local dataset ingestion handler
-│           └── engine.py               # The core sklearn integration logic
-│
-├── train_model.py                      # Standalone barebones CLI trainer script
-├── data_server.py                      # The Ngrok-ready dataset file server
-└── .gitignore                          
+    API -- "REST API (JSON / Webhooks)" --> ReactUI
+    StreamlitUI -. "Optional: Standalone Execution Pipeline" .-> MLCore
 ```
 
 ---
 
-## 🏁 Quick Start
+## ⚡ Engineering the Data Pipeline
+
+Processing network datasets (like CICIDS-2017 or NSL-KDD) natively on platforms like Docker/Render results in immediate `MemoryError` and Disk-Space quota breaches.
+
+### 1. The Local Distributed SAN strategy
+Instead of hosting 10GB CSV files in the cloud, `data_server.py` runs locally. It spins up a highly optimized `http.server` that reads `[dataset-part1...part4].csv` simultaneously, utilizing `itertools` to interleave raw data and stream exact row-counts over an Ngrok tunnel to the FastAPI backend.
+
+### 2. Aggressive In-Memory Downcasting
+Once chunked data arrives at the cloud backend, 64-bit precision is universally scrapped:
+- `float64` → `float32`
+- `int64` → `int32`
+This seemingly simple step slashes RAM allocation footprint by ~50%, allowing matrix multiplication protocols (like MLP calculation) to survive low-tier cloud instances.
+
+### 3. Dimensionality Reduction
+Out of 80+ potential features in standard network captures, CyberSentinel tightly slices data down to the **15 most critical TCP/IP feature vectors** (e.g., `TCP_WIN_SCALE`, `FLOW_DURATION`, `PROTOCOL`, `DST_TOS`), discarding null fields and infinite ratios to prevent gradient overflow.
+
+---
+
+## 🧠 Machine Learning & MLOps
+
+### The Multi-Model Benchmark
+
+The `engine.py` pipeline orchestrates a concurrent train-test-evaluation sequence employing a standardized 70/30 split. The system races the following models against each other:
+
+| Model Architecture | Purpose & Strengths |
+| :--- | :--- |
+| **Random Forest** (n=30) | High resistance to overfitting, produces robust baseline feature importance metrics. |
+| **XGBoost** | Handles the massive class imbalances inherent in intrusion datasets via gradient-penalization. |
+| **Decision Tree** (depth=4) | Ultra-fast inference with mathematically transparent branching rules. |
+| **Multi-Layer Perceptron** | Deep learning representation capable of discovering severe non-linear relationships across OSI layers. |
+| **Gaussian Naïve Bayes** | Evaluates independent statistical probabilities. Extremely lightweight. |
+
+**Auto-Promotion:** The system generates detailed evaluation matrix metrics (Accuracy, Precision, Recall, and ROC-AUC). Because False Negatives in NIDS are catastrophic, the model achieving the highest **Weighted F1-Score** is seamlessly elected to "Active Status" and begins proxying all live `/api/predict` traffic.
+
+### Explainable AI (XAI) & Feature Interpretability
+
+CyberSentinel implements dynamic global and local feature importance transparency.
+
+* **Global Level:** Displays high-level radar and bar charts representing exactly which packet features dictate the model’s splits (e.g. tracking `TCP_WIN_SCALE_OUT` as the primary differentiator for a SYN flood).
+* **Local Level (Per-Packet):** For every simulated packet blocked, the engine calculates the probability distribution across all possible labels, translating mathematical feature weights into actionable English text like: _"The TCP negotiation parameters diverged from standard handshake behavior."_
+
+---
+
+## 🖥️ Dual-Frontend Paradigm
+
+CyberSentinel exposes the ML engine through two distinct views depending on user personas.
+
+### 1. React + Vite Cyber Dashboard (`/cyber-dashboard`)
+**Intended for:** C-Suite, IT Display Screens, and High-Level Overviews.
+* Built entirely in React 18 and TailwindCSS 4.
+* Uses **Framer Motion** for liquid-smooth HUD animations and **Recharts** for live telemetry.
+* Hits the FastAPI `/api/dashboard`, `/api/system`, and `/api/predict` endpoints via automated polling interval loops.
+
+### 2. Streamlit Advanced SOC Console (`/IntrusionDetectionDashboard`)
+**Intended for:** Security Analysts, Data Scientists, and Threat Hunters.
+* A massive fully-native pure-Python dashboard.
+* Contains interactive Plotly Confusion Matrices and ROC-AUC curve rendering.
+* Manages the "Model Sandbox" where users can surgically load specific `joblib` artifacts and alter hyperparameters on the fly.
+* Displays the "Threat Intelligence" detailed logs with Explainable AI reasoning strings under the 'Intelligence' Tab.
+
+---
+
+## 🛠️ Tech Stack Overview
+
+| Category | Technology |
+|---|---|
+| **Core ML Engine** | Scikit-Learn, XGBoost, Pandas, NumPy |
+| **REST Infrastructure** | FastAPI, Uvicorn, Python 3.10+ |
+| **React Interface** | React 18, Vite, TailwindCSS, Framer Motion, Recharts |
+| **Analyst Interface** | Streamlit 1.25+, Plotly 5.15+ |
+| **DevOps / Hosting** | Render (Backend), Vercel (React), Ngrok (Data Tunnel) |
+
+---
+
+## 🏁 Getting Started
 
 ### Prerequisites
-- Python 3.10+
-- Node.js 18+
+* Python `3.10+` Minimum
+* Node.js `18+` Minimum
 
-### 1. FastAPI Backend
+### Phase 1: Local Data Server (Ingestion source)
+If using the massively large datasets locally, drop them into the project root (`dataset-partX.csv`).
+```bash
+python data_server.py
+```
+*(Optional) To expose to the cloud backend over WAN:*
+```bash
+ngrok http 7860
+```
 
+### Phase 2: FastAPI Backend Engine
 ```bash
 cd cyber-dashboard/backend
-
-# Create and activate virtual environment
 python -m venv venv
-source venv/bin/activate       # Unix
-# venv\Scripts\activate       # Windows
+source venv/bin/activate  # Unix
+venv\Scripts\activate     # Windows
 
-# Install dependencies
 pip install -r requirements.txt
 
-# Start the ASGI server
+# Start the highly optimized Uvicorn worker
 uvicorn server:app --host 0.0.0.0 --port 8000 --reload
 ```
-API Documentation available instantly at `http://localhost:8000/docs`
+_Visit `http://localhost:8000/docs` to see the live Swagger OpenAPI specification._
 
-### 2. React Frontend
-
+### Phase 3: The React Frontend
 ```bash
 cd cyber-dashboard
-
 npm install
-
-# Hook up local API
+# Route queries to localhost
 echo "VITE_API_URL=http://localhost:8000" > .env.development
-
 npm run dev
 ```
-Dashboard live at `http://localhost:5173`
 
-### 3. Streamlit SOC Dashboard
-
+### Alternative: The Streamlit SOC Console
+Instead of the React/FastAPI combo, you can run the monolithic analytical dashboard directly:
 ```bash
 cd IntrusionDetectionDashboard
 python -m venv .venv
 source .venv/bin/activate
-
 pip install -r requirements.txt
 streamlit run app.py
 ```
-App live at `http://localhost:8501`. 
-
-*(Note: Data must be present in the project root, or the app engages full synthetic fallback mode).*
 
 ---
 
-## ☁️ Deployment Specifications
+## 🚀 Future Roadmap
 
-### Deploy FastAPI Backend to Render
-1. Map repository to Render Web Service. Base dir: `cyber-dashboard/backend`.
-2. Build Command: `pip install -r requirements.txt`
-3. Start Command: `uvicorn server:app --host 0.0.0.0 --port $PORT`
-4. Define env vars: `DATA_SOURCE_URL` (Ngrok URL of your laptop) and `DATA_SECRET`.
-
-### Deploy React Frontend to Vercel
-1. Map repository to Vercel. Base dir: `cyber-dashboard`.
-2. Framework: Vite. Build Command: `npm run build`.
-3. Add Environment Variable `VITE_API_URL` pointing strictly to your Render domain.
-
----
-
-## 📡 API Reference
-
-*Base URL: `http://localhost:8000` (or Render domain)*
-
-| Method | Endpoint | Internal Operation |
-|---|---|---|
-| `GET` | `/api/health` | Rapid liveness probe. Returns up-time and loaded ML cache count. |
-| `POST` | `/api/train` | Triggers the `engine.py` pipeline. Pulls rows, fits scaler, trains classifiers. |
-| `GET` | `/api/models` | Returns hyper-parameters and validation metrics (F1, Accuracy) for UI leaderboard. |
-| `POST` | `/api/set-active/{model_name}` | Overrides the auto-selected best model memory ptr mechanism. |
-| `POST` | `/api/predict` | Pushes N synthesized packets through the `.predict_proba()` of the active model. |
-| `GET` | `/api/dashboard` | Aggregates all session stats (Total blocked, Threat Level matrix). |
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome. Please open an issue before submitting massive architectural PRs.
-
-1. Fork the repo.
-2. Branch: `feature/your-insight`
-3. Commit with detailed messages.
-4. Pull Request.
+* **Live PCAP Sniffing:** Replacing simulated CSV inference with direct integration of `pyshark` or `scapy` to evaluate packets off physical Network Interface Cards (NICs), transforming the codebase from a Dashboard into an active Next-Gen Firewall (NGFW). 
+* **Deep Sequence Models:** Upgrading from stateless Scikit-Learn evaluation to PyTorch LSTMs, permitting the system to remember long-tail connection contexts identifying low-and-slow DoS attacks like "Slowloris".
+* **Kafka & PostgreSQL Integration:** Migrating from in-process FastAPI memory states to high-throughput Apache Kafka streaming with persistent distributed PostgreSQL logging.
 
 ---
 
 <div align="center">
-
-**Built by [Soubhagya Jain](https://github.com/SoubhagyaJain)**
-
-*Securing the network one vector at a time.*
-
+<b>Designed & Architected by <a href="https://github.com/SoubhagyaJain">Soubhagya Jain</a></b>
+<br/>
+<i>Securing the Zero-Trust network layer, one packet vector at a time.</i>
 </div>
